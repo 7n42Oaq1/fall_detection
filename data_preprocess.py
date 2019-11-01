@@ -5,6 +5,7 @@ import os
 from scipy.signal import butter, lfilter
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 
 '''
 Denoise data, split data and then generate original dataset for training and testing.
@@ -68,7 +69,9 @@ def generate_dataset(data, window_size=400, overlap=0.5):
     activities = pd.unique(data['activity'])
     for act in activities:
         df_temp = data[data['activity'] == act]
+        df_temp.drop('activity')
         df_temp = df_temp.values
+
         row = 0
         total_row = df_temp.shape[0]
         while row < total_row:
@@ -79,6 +82,7 @@ def generate_dataset(data, window_size=400, overlap=0.5):
             row += int(window_size * overlap)
     X = np.array(X)
     y = np.array(y)
+        
     return X, y
 
 def split_dataset(df='acc_data'):
@@ -89,27 +93,33 @@ def split_dataset(df='acc_data'):
     return X_train, X_test, X_val, y_val, y_train, y_test
 
 if __name__ == "__main__":
-    # acc_data, gyro_data, ori_data = load_data()
-    # acc_data = denoise_data(acc_data)
-    # gyro_data = denoise_data(gyro_data)
-    # save_data(acc_data, 'acc_data')
-    # save_data(gyro_data, 'gyro_data')   
+    acc_data, gyro_data, ori_data = load_data()
+    acc_data = denoise_data(acc_data)
+    gyro_data = denoise_data(gyro_data)
+    save_data(acc_data, 'acc_data')
+    save_data(gyro_data, 'gyro_data')   
 
+    min_max_scaler = preprocessing.MinMaxScaler()
     X_train, X_test,X_val, y_train, y_test,y_val = split_dataset()
     print(X_train.shape, X_test.shape, X_val.shape, y_train.shape, y_test.shape, y_val.shape)
+    X_train = min_max_scaler.fit_transform(X_train)
+    X_test = min_max_scaler.fit_transform(X_test)
+    X_val = min_max_scaler.fit_transform(X_val)
     np.save('dataset/acc_x_train.npy', X_train)
-    np.save('dataset/acc_y_train.npy', y_train)
+    np.save('dataset/y_train.npy', y_train)
     np.save('dataset/acc_x_test.npy', X_test)
-    np.save('dataset/acc_y_test.npy', y_test)
+    np.save('dataset/y_test.npy', y_test)
     np.save('dataset/acc_x_val.npy', X_train)
-    np.save('dataset/acc_y_val.npy', y_train)
+    np.save('dataset/y_val.npy', y_train)
 
-    # X_train, X_test,X_val, y_train, y_test,y_val = split_dataset(df='gyro_data')
-    # print(X_train.shape, X_test.shape, X_val.shape, y_train.shape, y_test.shape, y_val.shape)
-    # np.save('gyro_x_train.npy', X_train)
-    # np.save('gyro_y_train.npy', y_train)
-    # np.save('gyro_x_test.npy', X_test)
-    # np.save('gyro_y_test.npy', y_test)
-    # np.save('gyro_x_val.npy', X_train)
-    # np.save('gyro_y_val.npy', y_train)
+    X_train, X_test,X_val, y_train, y_test,y_val = split_dataset(df='gyro_data')
+    print(X_train.shape, X_test.shape, X_val.shape, y_train.shape, y_test.shape, y_val.shape)
+    X_train = min_max_scaler.fit_transform(X_train)
+    X_test = min_max_scaler.fit_transform(X_test)
+    X_val = min_max_scaler.fit_transform(X_val)
+    np.save('gyro_x_train.npy', X_train)
+    np.save('gyro_x_test.npy', X_test)
+    np.save('gyro_x_val.npy', X_train)
+
+
 
