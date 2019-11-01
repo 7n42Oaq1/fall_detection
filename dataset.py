@@ -25,7 +25,10 @@ class FallDetectionDataset(Dataset):
     
     def __getitem__(self, idx):
         X_acc = self.acc_data[idx]
+        X_acc = X_acc.transpose((1, 0))
         X_gyro = self.gyro_data[idx]
+        X_gyro = X_gyro.transpose((1, 0))
+
         X = np.stack((X_acc, X_gyro), axis=0)
         y = self.label[idx]
 
@@ -40,11 +43,11 @@ class To2D(object):
         new_acc = None
         new_gyro = None
         if isinstance(self.shape, int):
-            new_acc = x[0].reshape((self.shape, self.shape, 3))
-            new_gyro = x[1].reshape((self.shape, self.shape, 3))
+            new_acc = x[0].reshape((3,self.shape, self.shape))
+            new_gyro = x[1].reshape((3,self.shape, self.shape))
         else:
-            new_acc = x[0].reshape((self.shape[0], self.shape[1], 3))
-            new_gyro = x[1].reshape((self.shape[0], self.shape[1], 3))
+            new_acc = x[0].reshape((3,self.shape[0], self.shape[1]))
+            new_gyro = x[1].reshape((3,self.shape[0], self.shape[1]))
         new_x = np.stack((new_acc, new_gyro), axis=0)
         return new_x            
 

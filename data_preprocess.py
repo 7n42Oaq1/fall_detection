@@ -34,6 +34,10 @@ def load_data(resampling_rate=5):
                     df = df.set_index('timestamp')
                     df =df.drop_duplicates()
                     df = df.resample(str(resampling_rate) + 'ms').bfill()
+                    # df['x'] = df['x'].interpolate()
+                    # df['y'] = df['y'].interpolate()
+                    # df['z'] = df['z'].interpolate()
+
                     df['activity'] = classes[data]
 
                     if 'acc' in name:
@@ -69,7 +73,6 @@ def generate_dataset(data, window_size=400, overlap=0.5):
     activities = pd.unique(data['activity'])
     for act in activities:
         df_temp = data[data['activity'] == act]
-        df_temp.drop('activity')
         df_temp = df_temp.values
 
         row = 0
@@ -90,7 +93,8 @@ def split_dataset(df='acc_data'):
     X, y=generate_dataset(acc_data)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=1)
-    return X_train, X_test, X_val, y_val, y_train, y_test
+    return X_train, X_test, X_val, y_train,  y_test, y_val
+    # return X_train, X_test, y_train, y_test
 
 if __name__ == "__main__":
     acc_data, gyro_data, ori_data = load_data()
@@ -99,27 +103,46 @@ if __name__ == "__main__":
     save_data(acc_data, 'acc_data')
     save_data(gyro_data, 'gyro_data')   
 
-    min_max_scaler = preprocessing.MinMaxScaler()
+    # min_max_scaler = preprocessing.Normalizer()
     X_train, X_test,X_val, y_train, y_test,y_val = split_dataset()
-    print(X_train.shape, X_test.shape, X_val.shape, y_train.shape, y_test.shape, y_val.shape)
-    X_train = min_max_scaler.fit_transform(X_train)
-    X_test = min_max_scaler.fit_transform(X_test)
-    X_val = min_max_scaler.fit_transform(X_val)
+    # X_train[:,0] = min_max_scaler.fit_transform(X_train[:,0])
+    # X_train[:,1] = min_max_scaler.fit_transform(X_train[:,1])
+    # X_train[:,2] = min_max_scaler.fit_transform(X_train[:,2])
+
+    # X_test[:,0] = min_max_scaler.fit_transform(X_test[:,0])
+    # X_test[:,1] = min_max_scaler.fit_transform(X_test[:,1])
+    # X_test[:,2] = min_max_scaler.fit_transform(X_test[:,2])
+
+    # X_val[:, 0] = min_max_scaler.fit_transform(X_val[:, 0])
+    # X_val[:, 1] = min_max_scaler.fit_transform(X_val[:, 1])
+    # X_val[:, 2] = min_max_scaler.fit_transform(X_val[:, 2])
+
     np.save('dataset/acc_x_train.npy', X_train)
     np.save('dataset/y_train.npy', y_train)
     np.save('dataset/acc_x_test.npy', X_test)
     np.save('dataset/y_test.npy', y_test)
-    np.save('dataset/acc_x_val.npy', X_train)
-    np.save('dataset/y_val.npy', y_train)
+    np.save('dataset/acc_x_val.npy', X_val)
+    np.save('dataset/y_val.npy', y_val)
 
     X_train, X_test,X_val, y_train, y_test,y_val = split_dataset(df='gyro_data')
-    print(X_train.shape, X_test.shape, X_val.shape, y_train.shape, y_test.shape, y_val.shape)
-    X_train = min_max_scaler.fit_transform(X_train)
-    X_test = min_max_scaler.fit_transform(X_test)
-    X_val = min_max_scaler.fit_transform(X_val)
-    np.save('gyro_x_train.npy', X_train)
-    np.save('gyro_x_test.npy', X_test)
-    np.save('gyro_x_val.npy', X_train)
+    # X_train[:,0] = min_max_scaler.fit_transform(X_train[:,0])
+    # X_train[:,1] = min_max_scaler.fit_transform(X_train[:,1])
+    # X_train[:,2] = min_max_scaler.fit_transform(X_train[:,2])
 
+    # X_test[:,0] = min_max_scaler.fit_transform(X_test[:,0])
+    # X_test[:,1] = min_max_scaler.fit_transform(X_test[:,1])
+    # X_test[:,2] = min_max_scaler.fit_transform(X_test[:,2])
+
+    # X_val[:, 0] = min_max_scaler.fit_transform(X_val[:, 0])
+    # X_val[:, 1] = min_max_scaler.fit_transform(X_val[:, 1])
+    # X_val[:, 2] = min_max_scaler.fit_transform(X_val[:, 2])
+    np.save('dataset/gyro_x_train.npy', X_train)
+    np.save('dataset/gyro_x_test.npy', X_test)
+    np.save('dataset/gyro_x_val.npy', X_val)
+
+    acc_train = np.load('dataset/acc_x_train.npy')
+    print(acc_train.shape)     
+    gyro_train = np.load('dataset/gyro_x_train.npy')
+    print(gyro_train.shape)
 
 
